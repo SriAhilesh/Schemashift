@@ -1,0 +1,404 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f5f7fb;
+  color: #1f2937;
+}
+
+.app {
+  min-height: 100vh;
+  padding-bottom: 60px;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.header {
+  background: #111827;
+  color: white;
+  padding: 28px 60px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 30px;
+}
+
+.header p {
+  margin: 6px 0 0;
+  color: #cbd5e1;
+}
+
+
+/* =========================
+   INPUT SECTION
+========================= */
+
+.input-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding: 35px 60px 20px;
+}
+
+.input-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 22px;
+}
+
+.input-card h2 {
+  margin-top: 0;
+  margin-bottom: 6px;
+}
+
+.input-description {
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+textarea {
+  width: 100%;
+  min-height: 220px;
+  resize: vertical;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  padding: 14px;
+  font-family: Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  outline: none;
+}
+
+textarea:focus {
+  border-color: #64748b;
+}
+
+
+/* =========================
+   BUTTON
+========================= */
+
+.analyze-container {
+  padding: 10px 60px 30px;
+}
+
+button {
+  background: #111827;
+  color: white;
+  border: none;
+  border-radius: 7px;
+  padding: 13px 25px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #374151;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+/* =========================
+   ERROR
+========================= */
+
+.error {
+  margin: 0 60px 25px;
+  padding: 14px;
+  border-radius: 7px;
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+
+/* =========================
+   RESULT
+========================= */
+
+.result-section {
+  margin: 0 60px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.result-header {
+  padding: 25px 30px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.result-header h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.target-badge {
+  background: #ecfdf5;
+  color: #065f46;
+  padding: 10px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+}
+
+.target-badge strong {
+  margin-left: 7px;
+}
+
+
+/* =========================
+   RESULT BLOCK
+========================= */
+
+.result-block {
+  padding: 28px 30px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.result-block:last-child {
+  border-bottom: none;
+}
+
+.result-block h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+
+/* =========================
+   COLLECTIONS
+========================= */
+
+.collections {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,
+      minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.collection-card {
+  border: 1px solid #dbe2ea;
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+.collection-title {
+  background: #f1f5f9;
+  padding: 14px 16px;
+  font-weight: 700;
+  font-size: 17px;
+  text-transform: uppercase;
+}
+
+.collection-icon {
+  margin-right: 8px;
+}
+
+.fields {
+  padding: 8px 16px;
+}
+
+.field-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.field-row:last-child {
+  border-bottom: none;
+}
+
+.field-name {
+  font-family: Consolas, monospace;
+  font-weight: 600;
+}
+
+.field-type {
+  font-family: Consolas, monospace;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.primary-key {
+  margin-left: auto;
+  font-size: 11px;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 4px 7px;
+  border-radius: 5px;
+}
+
+
+/* =========================
+   EMBEDDED DOCUMENT
+========================= */
+
+.embedded-section {
+  margin: 0 16px 16px;
+  padding: 15px;
+  background: #f8fafc;
+  border-left: 3px solid #64748b;
+  border-radius: 5px;
+}
+
+.embedded-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.embedded-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.embedded-name {
+  font-family: Consolas, monospace;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.embedded-field {
+  display: flex;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-family: Consolas, monospace;
+  font-size: 13px;
+}
+
+.embedded-field:last-child {
+  border-bottom: none;
+}
+
+.reference-badge {
+  margin-left: auto;
+  background: #e0e7ff;
+  color: #3730a3;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+
+/* =========================
+   DECISIONS
+========================= */
+
+.decisions {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.decision-card {
+  border: 1px solid #dbe2ea;
+  border-radius: 9px;
+  padding: 20px;
+}
+
+.decision-relationship {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.strategy-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 18px;
+  color: #64748b;
+}
+
+.strategy {
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 5px;
+  background: #dcfce7;
+  color: #166534;
+}
+
+.strategy.reference {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.strategy.embed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.strategy.embed-\+\-reference {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.decision-detail {
+  margin-top: 14px;
+}
+
+.decision-detail strong {
+  font-size: 14px;
+}
+
+.decision-detail p {
+  margin: 6px 0 0;
+  color: #64748b;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 800px) {
+
+  .input-section {
+    grid-template-columns: 1fr;
+    padding: 25px;
+  }
+
+  .analyze-container {
+    padding-left: 25px;
+    padding-right: 25px;
+  }
+
+  .result-section {
+    margin: 0 25px;
+  }
+
+  .header {
+    padding: 25px;
+  }
+
+  .result-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+}
