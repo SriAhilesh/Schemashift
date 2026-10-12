@@ -1,28 +1,59 @@
+/**
+ * SchemaShift - Query Analyzer
+ * Parses representative SQL queries into structured access patterns.
+ * 
+ * Extracts:
+ * - Query type (SELECT, INSERT, UPDATE, DELETE)
+ * - Tables referenced and their aliases (e.g., Student s, Orders AS o)
+ * - Joined table pairs (JOIN ... ON ...)
+ * - Filter predicates (WHERE clauses)
+ * - Single-table vs co-accessed patterns
+ * - Warnings for unsupported query constructs (UNION, subqueries)
+ */
+
+function stripComments(sql) {
+  if (!sql) return "";
+  return sql
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/--.*$/gm, "");
+}
+
+function cleanIdentifier(id) {
+  if (!id) return "";
+  return id.trim().replace(/^[`'"]|[`'"]$/g, "");
+}
+
 function analyzeQueries(sqlQueries) {
-
   const queries = [];
+  const warnings = [];
 
-  // Split multiple SQL queries using semicolon
-  const queryList = sqlQueries
+  if (!sqlQueries || typeof sqlQueries !== "string" || sqlQueries.trim().length === 0) {
+    return [];
+  }
+
+  const cleanSql = stripComments(sqlQueries);
+
+  // Split multiple queries by semicolon
+  const rawQueryList = cleanSql
     .split(";")
-    .map(query => query.trim())
-    .filter(query => query.length > 0);
+    .map(q => q.trim())
+    .filter(q => q.length > 0);
 
-  for (const sql of queryList) {
-
+  for (const sql of rawQueryList) {
     const queryInfo = {
       query: sql,
       type: "UNKNOWN",
       tables: [],
+      tableAliases: {},
       selectedColumns: [],
       filters: [],
-      joins: []
+      joins: [],
+      joinedPairs: [],
+      isJoinQuery: false,
+      warnings: []
     };
 
-    // -----------------------------------------
-    // Detect query type
-    // -----------------------------------------
-
+    // 1. Detect query type
     if (/^\s*SELECT/i.test(sql)) {
       queryInfo.type = "SELECT";
     } else if (/^\s*INSERT/i.test(sql)) {
@@ -31,81 +62,93 @@ function analyzeQueries(sqlQueries) {
       queryInfo.type = "UPDATE";
     } else if (/^\s*DELETE/i.test(sql)) {
       queryInfo.type = "DELETE";
+    } else {
+      queryInfo.warnings.push("Unsupported or non-DML SQL query type.");
     }
 
-    // -----------------------------------------
-    // Extract SELECT columns
-    // -----------------------------------------
+    // 2. Detect unsupported constructs
+    if (/\bUNION\b/i.test(sql)) {
+      queryInfo.warnings.push("UNION operations are not modeled in document access patterns.");
+    }
+    if (/\(\s*SELECT\b/i.test(sql)) {
+      queryInfo.warnings.push("Subqueries are currently parsed as outer-level references.");
+    }
 
-    const selectMatch = sql.match(
-      /SELECT\s+([\s\S]*?)\s+FROM/i
-    );
-
+    // 3. Extract SELECT columns
+    const selectMatch = sql.match(/SELECT\s+([\s\S]*?)\s+FROM/i);
     if (selectMatch) {
-
-      queryInfo.selectedColumns =
-        selectMatch[1]
-          .split(",")
-          .map(column => column.trim());
+      queryInfo.selectedColumns = selectMatch[1]
+        .split(",")
+        .map(col => col.trim())
+        .filter(Boolean);
     }
 
-    // -----------------------------------------
-    // Extract FROM table
-    // -----------------------------------------
-
-    const fromMatch = sql.match(
-      /FROM\s+([A-Za-z_][A-Za-z0-9_]*)/i
-    );
-
+    // 4. Extract FROM table and alias
+    // Pattern: FROM TableName [AS] [alias]
+    const fromMatch = sql.match(/FROM\s+([`'"\w]+)(?:\s+(?:AS\s+)?([`'"\w]+))?(?=\s+JOIN|\s+WHERE|\s+GROUP|\s+ORDER|\s+LIMIT|$)/i);
     if (fromMatch) {
+      const fromTable = cleanIdentifier(fromMatch[1]);
+      const alias = fromMatch[2] ? cleanIdentifier(fromMatch[2]) : null;
 
-      queryInfo.tables.push(fromMatch[1]);
+      // Filter out SQL keywords inadvertently captured as alias
+      const reserved = ["WHERE", "JOIN", "LEFT", "RIGHT", "INNER", "CROSS", "NATURAL", "ON", "GROUP", "ORDER", "LIMIT"];
+      const validAlias = alias && !reserved.includes(alias.toUpperCase()) ? alias : null;
+
+      queryInfo.tables.push(fromTable);
+      if (validAlias) {
+        queryInfo.tableAliases[validAlias] = fromTable;
+      }
     }
 
-    // -----------------------------------------
-    // Extract JOIN tables
-    // -----------------------------------------
-
-    const joinRegex =
-      /JOIN\s+([A-Za-z_][A-Za-z0-9_]*)\s*(?:AS\s+)?(\w+)?\s*ON\s+(.+?)(?=\s+JOIN|\s+WHERE|\s+GROUP|\s+ORDER|$)/gi;
+    // 5. Extract JOINs
+    // Pattern: [INNER|LEFT|RIGHT|FULL] JOIN TableName [AS] [alias] ON condition
+    const joinRegex = /(?:(INNER|LEFT|RIGHT|FULL|CROSS)\s+)?JOIN\s+([`'"\w]+)(?:\s+(?:AS\s+)?([`'"\w]+))?\s+ON\s+([\s\S]*?)(?=\s+(?:INNER|LEFT|RIGHT|FULL|CROSS\s+)?JOIN|\s+WHERE|\s+GROUP|\s+ORDER|\s+LIMIT|$)/gi;
 
     let joinMatch;
-
     while ((joinMatch = joinRegex.exec(sql)) !== null) {
+      const joinType = (joinMatch[1] || "INNER").toUpperCase();
+      const joinTable = cleanIdentifier(joinMatch[2]);
+      const rawAlias = joinMatch[3] ? cleanIdentifier(joinMatch[3]) : null;
+      const reserved = ["WHERE", "JOIN", "ON", "GROUP", "ORDER", "LIMIT"];
+      const alias = rawAlias && !reserved.includes(rawAlias.toUpperCase()) ? rawAlias : null;
+      const condition = joinMatch[4].trim();
 
-      const tableName = joinMatch[1];
-      const alias = joinMatch[2] || null;
-      const condition = joinMatch[3].trim();
-
-      queryInfo.tables.push(tableName);
+      queryInfo.tables.push(joinTable);
+      if (alias) {
+        queryInfo.tableAliases[alias] = joinTable;
+      }
 
       queryInfo.joins.push({
-        table: tableName,
-        alias: alias,
-        condition: condition
+        type: joinType,
+        table: joinTable,
+        alias,
+        condition
       });
+
+      queryInfo.isJoinQuery = true;
     }
 
-    // -----------------------------------------
-    // Extract WHERE conditions
-    // -----------------------------------------
+    // 6. Resolve joined pairs from condition or FROM + JOIN
+    // In SQL joins: FROM T1 JOIN T2 -> T1 and T2 are co-accessed
+    const distinctTables = [...new Set(queryInfo.tables)];
+    queryInfo.tables = distinctTables;
 
-    const whereMatch = sql.match(
-      /WHERE\s+([\s\S]*?)(?=\s+GROUP\s+BY|\s+ORDER\s+BY|\s+LIMIT|$)/i
-    );
+    if (distinctTables.length > 1) {
+      for (let i = 0; i < distinctTables.length; i++) {
+        for (let j = i + 1; j < distinctTables.length; j++) {
+          queryInfo.joinedPairs.push([distinctTables[i], distinctTables[j]]);
+        }
+      }
+    }
 
+    // 7. Extract WHERE conditions
+    const whereMatch = sql.match(/WHERE\s+([\s\S]*?)(?=\s+GROUP\s+BY|\s+ORDER\s+BY|\s+LIMIT|$)/i);
     if (whereMatch) {
-
-      queryInfo.filters =
-        whereMatch[1]
-          .split(/\s+AND\s+/i)
-          .map(condition => condition.trim());
+      queryInfo.filters = whereMatch[1]
+        .split(/\s+AND\s+/i)
+        .map(f => f.trim())
+        .filter(Boolean);
     }
-
-    // Remove duplicate table names
-    queryInfo.tables = [
-      ...new Set(queryInfo.tables)
-    ];
 
     queries.push(queryInfo);
   }

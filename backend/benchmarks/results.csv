@@ -1,0 +1,15 @@
+BENCHMARK 1: SCHEMA ANALYSIS
+Tables,Columns,Relationships,Queries,Median_Latency_ms,Min_Latency_ms,Max_Latency_ms
+3,11,2,3,0.065,0.058,0.271
+10,39,9,10,0.148,0.131,1.261
+25,99,24,25,0.445,0.358,1.226
+
+BENCHMARK 2: DATA TRANSFORMATION
+Source_Records,Customers,Orders,Transformed_Docs,Xform_Time_ms,Mongo_Insert_Time_ms,Total_Time_ms,Integrity_Passed
+100,25,75,25,3.01,117.77,120.77,true
+1000,250,750,250,112.04,575.41,687.45,true
+5000,1250,3750,1250,2175.3,3094.31,5269.62,true
+
+BENCHMARK 3: INDEX EVALUATION
+Target_Collection,Query,Unindexed_Latency_ms,Unindexed_Stage,Indexed_Latency_ms,Indexed_Stage,Speedup
+ss_data_customer_bench_5000_1791810608847,"{"customer_id":125}",33.61,COLLSCAN,33.025,FETCH,1.02x

@@ -1,0 +1,29 @@
+# Environment variables (NEVER COMMIT CREDENTIALS)
+.env
+.env.local
+.env.*.local
+*.env
+
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist/
+dist-ssr/
+build/
+
+# Temporary archives
+*.zip
+*.tar.gz
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE configuration
+.idea/
+.vscode/*
+!.vscode/extensions.json

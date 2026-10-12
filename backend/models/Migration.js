@@ -52,7 +52,7 @@ const migrationSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model(
-  "Migration",
-  migrationSchema
-);
+// Index to optimize chronological retrieval of migration history
+migrationSchema.index({ createdAt: -1 });
+
+module.exports = mongoose.model("Migration", migrationSchema);

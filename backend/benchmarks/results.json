@@ -1,0 +1,101 @@
+{
+  "environment": {
+    "nodeVersion": "v22.14.0",
+    "platform": "win32",
+    "arch": "x64",
+    "timestamp": "2026-10-12T13:10:08.011Z",
+    "databaseHost": "ac-u9ktsbz-shard-00-00.ewyljs4.mongodb.net"
+  },
+  "benchmark1_schemaAnalysis": [
+    {
+      "tablesCount": 3,
+      "columnsCount": 11,
+      "relationshipsCount": 2,
+      "queriesCount": 3,
+      "trialsCount": 15,
+      "medianLatencyMs": 0.065,
+      "minLatencyMs": 0.058,
+      "maxLatencyMs": 0.271
+    },
+    {
+      "tablesCount": 10,
+      "columnsCount": 39,
+      "relationshipsCount": 9,
+      "queriesCount": 10,
+      "trialsCount": 15,
+      "medianLatencyMs": 0.148,
+      "minLatencyMs": 0.131,
+      "maxLatencyMs": 1.261
+    },
+    {
+      "tablesCount": 25,
+      "columnsCount": 99,
+      "relationshipsCount": 24,
+      "queriesCount": 25,
+      "trialsCount": 15,
+      "medianLatencyMs": 0.445,
+      "minLatencyMs": 0.358,
+      "maxLatencyMs": 1.226
+    }
+  ],
+  "benchmark2_dataTransformation": [
+    {
+      "sourceRecords": 100,
+      "customerCount": 25,
+      "orderCount": 75,
+      "transformedDocuments": 25,
+      "rejectedRecords": 0,
+      "integrityPassed": true,
+      "transformationTimeMs": 3.01,
+      "mongodbInsertionTimeMs": 117.77,
+      "totalProcessingTimeMs": 120.77,
+      "collectionsCreated": [
+        "ss_data_customer_bench_100_1791810608035"
+      ]
+    },
+    {
+      "sourceRecords": 1000,
+      "customerCount": 250,
+      "orderCount": 750,
+      "transformedDocuments": 250,
+      "rejectedRecords": 0,
+      "integrityPassed": true,
+      "transformationTimeMs": 112.04,
+      "mongodbInsertionTimeMs": 575.41,
+      "totalProcessingTimeMs": 687.45,
+      "collectionsCreated": [
+        "ss_data_customer_bench_1000_1791810608156"
+      ]
+    },
+    {
+      "sourceRecords": 5000,
+      "customerCount": 1250,
+      "orderCount": 3750,
+      "transformedDocuments": 1250,
+      "rejectedRecords": 0,
+      "integrityPassed": true,
+      "transformationTimeMs": 2175.3,
+      "mongodbInsertionTimeMs": 3094.31,
+      "totalProcessingTimeMs": 5269.62,
+      "collectionsCreated": [
+        "ss_data_customer_bench_5000_1791810608847"
+      ]
+    }
+  ],
+  "benchmark3_indexingEvaluation": {
+    "targetCollection": "ss_data_customer_bench_5000_1791810608847",
+    "queryPattern": "{\"customer_id\":125}",
+    "iterations": 20,
+    "unindexed": {
+      "medianLatencyMs": 33.61,
+      "stage": "COLLSCAN",
+      "docsExamined": 1250
+    },
+    "indexed": {
+      "medianLatencyMs": 33.025,
+      "stage": "FETCH",
+      "docsExamined": 1
+    },
+    "speedupFactor": "1.02x"
+  }
+}
